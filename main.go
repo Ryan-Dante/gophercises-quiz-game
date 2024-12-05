@@ -8,12 +8,19 @@ import (
 	"math/rand"
 	"os"
 	"strings"
+	"time"
 )
 
 func main() {
 	// Define the shuffle flag
 	shuffle := flag.Bool("shuffle", false, "shuffle the quiz questions")
+	timeLimit := flag.Int("limit", 30, "time limit for the quiz in seconds")
+
+	// Parse the flags
 	flag.Parse()
+
+	ticker := time.NewTicker(time.Duration(*timeLimit) * time.Second)
+	defer ticker.Stop()
 
 	// Open the csv file
 	quizcsv, err := os.Open("problems.csv")
@@ -36,6 +43,13 @@ func main() {
 	fmt.Println("Welcome to the quiz game!")
 	fmt.Println("Press enter to start the quiz")
 	fmt.Scanln()
+
+	// Start the timer
+	go func() {
+		<-ticker.C
+		fmt.Println("\nTime's up!")
+		os.Exit(0)
+	}()
 
 	// Randomize the order of the questions if shuffle flag is set
 	if *shuffle {
